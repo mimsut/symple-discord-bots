@@ -1,7 +1,7 @@
 name: SYMPLE Mental Care Daily (09:30 KST)
 on:
   schedule:
-    - cron: '30 0 * * *'  # 00:30 UTC = 09:30 KST
+    - cron: '30 0 * * *'
   workflow_dispatch:
 jobs:
   run:
@@ -14,6 +14,5 @@ jobs:
       - run: pip install -r requirements.txt -q
       - run: python scripts/mental_care.py
         env:
-
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_MENTAL_CARE: ${{ secrets.DISCORD_MENTAL_CARE }}

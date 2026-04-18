@@ -1,7 +1,7 @@
 name: Money Printer Morning Brief (08:00 KST)
 on:
   schedule:
-    - cron: '0 23 * * *'  # 23:00 UTC = 08:00 KST 다음날
+    - cron: '0 23 * * *'
   workflow_dispatch:
 jobs:
   run:
@@ -14,6 +14,5 @@ jobs:
       - run: pip install -r requirements.txt -q
       - run: python scripts/money_printer.py
         env:
-
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_MONEY_PRINTER: ${{ secrets.DISCORD_MONEY_PRINTER }}
