@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, requests, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from gemini_utils import get_model, generate
+from gemini_utils import get_client, generate
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
@@ -9,8 +9,8 @@ today = datetime.now(KST)
 today_str = today.strftime("%Y년 %m월 %d일")
 seed = today.strftime("%Y-%m-%d")
 
-model = get_model(os.environ["GEMINI_API_KEY"])
-text = generate(model, f"""날짜: {today_str} (시드: {seed})
+client = get_client()
+text = generate(client, f"""날짜: {today_str} (시드: {seed})
 당신은 Paul Graham + Sam Altman 스타일의 냉혹하게 솔직한 YC 파트너입니다.
 
 SYMPLE: CBT 기반 멘탈헬스 앱 Duck's Dream. 한국 B2C → 미국 B2B2C 기업 웰니스 피벗 중.

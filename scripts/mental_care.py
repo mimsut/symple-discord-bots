@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, requests, feedparser, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from gemini_utils import get_model, generate
+from gemini_utils import get_client, generate
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
@@ -34,8 +34,8 @@ for src in FEEDS:
         break
 
 news_text = "\n".join(entries[:10])
-model = get_model(os.environ["GEMINI_API_KEY"])
-text = generate(model, f"""오늘은 {today}. 아래 뉴스에서 가장 중요한 5개를 골라 Discord 메시지를 작성하세요.
+client = get_client()
+text = generate(client, f"""오늘은 {today}. 아래 뉴스에서 가장 중요한 5개를 골라 Discord 메시지를 작성하세요.
 
 뉴스:
 {news_text}

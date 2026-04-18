@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, requests, feedparser, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from gemini_utils import get_model, generate
+from gemini_utils import get_client, generate
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
@@ -30,8 +30,8 @@ for q in QUERIES:
         pass
 
 news_text = "\n".join(entries[:15]) or "• 오늘 관련 뉴스 없음"
-model = get_model(os.environ["GEMINI_API_KEY"])
-text = generate(model, f"""오늘은 {today}.
+client = get_client()
+text = generate(client, f"""오늘은 {today}.
 
 SYMPLE: CBT 기반 멘탈헬스 앱 Duck's Dream. CEO 김민수(연세대 심리학). 한국 B2C → 미국 B2B2C 피벗 중.
 성과: 토스 미니앱 신규 4위, 텀블벅, 대한디지털치료학회 우수포스터, SF MARU 3주.

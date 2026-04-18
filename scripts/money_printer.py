@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, requests, feedparser, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from gemini_utils import get_model, generate
+from gemini_utils import get_client, generate
 import yfinance as yf
 from datetime import datetime, timezone, timedelta
 
@@ -76,8 +76,8 @@ Fear&Greed: {fng_val}/100 ({fng_cls})
 매크로뉴스: {' | '.join(macro)}
 한국뉴스: {' | '.join(kr)}"""
 
-model = get_model(os.environ["GEMINI_API_KEY"])
-text = generate(model, f"""오늘은 {today_kst} 08:00 KST. 당신은 세계적 수준의 퀀트 트레이더·애널리스트입니다.
+client = get_client()
+text = generate(client, f"""오늘은 {today_kst} 08:00 KST. 당신은 세계적 수준의 퀀트 트레이더·애널리스트입니다.
 
 실시간 데이터:
 {data}

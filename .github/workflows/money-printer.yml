@@ -14,5 +14,5 @@ jobs:
       - run: pip install -r requirements.txt -q
       - run: python scripts/money_printer.py
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DISCORD_MONEY_PRINTER: ${{ secrets.DISCORD_MONEY_PRINTER }}
