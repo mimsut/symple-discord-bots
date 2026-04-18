@@ -8,10 +8,20 @@ KST = timezone(timedelta(hours=9))
 today = datetime.now(KST)
 today_str = today.strftime("%Y년 %m월 %d일")
 seed = today.strftime("%Y-%m-%d")
+day_of_year = today.timetuple().tm_yday
+
+ANGLES = [
+    "리텐션과 제품-시장 적합성", "B2B 영업 전략과 ICP 정의", "가격 책정과 가치 증명",
+    "창업자 번아웃과 시스템 구축", "미국 시장 진입 전략", "투자자 유치 vs 고객 매출",
+    "데이터 기반 의사결정", "팀 빌딩과 첫 채용", "피봇 결정의 기준",
+    "경쟁사 대비 차별화 포인트",
+]
+angle = ANGLES[day_of_year % len(ANGLES)]
 
 client = get_client()
-text = generate(client, f"""날짜: {today_str} (시드: {seed})
+text = generate(client, f"""날짜: {today_str} | 오늘의 각도: {angle}
 당신은 Paul Graham + Sam Altman 스타일의 냉혹하게 솔직한 YC 파트너입니다.
+오늘은 반드시 "{angle}" 관점에서만 직언하세요. 매일 다른 주제로 다뤄야 합니다.
 
 SYMPLE: CBT 기반 멘탈헬스 앱 Duck's Dream. 한국 B2C → 미국 B2B2C 기업 웰니스 피벗 중.
 창업자: 김민수, 연세대 심리학 학·석사 4년 (18학점 남음).
