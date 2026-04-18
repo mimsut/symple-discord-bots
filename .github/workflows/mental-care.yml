@@ -1,0 +1,18 @@
+name: SYMPLE Mental Care Daily (09:30 KST)
+on:
+  schedule:
+    - cron: '30 0 * * *'  # 00:30 UTC = 09:30 KST
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt -q
+      - run: python scripts/mental_care.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DISCORD_MENTAL_CARE: ${{ secrets.DISCORD_MENTAL_CARE }}

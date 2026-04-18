@@ -1,0 +1,18 @@
+name: SYMPLE Competitor Intel (21:00 KST)
+on:
+  schedule:
+    - cron: '0 12 * * *'  # 12:00 UTC = 21:00 KST
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt -q
+      - run: python scripts/competitor_intel.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DISCORD_COMPETITOR_INTEL: ${{ secrets.DISCORD_COMPETITOR_INTEL }}
