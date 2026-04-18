@@ -14,5 +14,6 @@ jobs:
       - run: pip install -r requirements.txt -q
       - run: python scripts/founder_feedback.py
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_YC_FEEDBACK: ${{ secrets.DISCORD_YC_FEEDBACK }}

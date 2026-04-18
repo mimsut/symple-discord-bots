@@ -14,5 +14,6 @@ jobs:
       - run: pip install -r requirements.txt -q
       - run: python scripts/fun_facts.py
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_FUN_FACTS: ${{ secrets.DISCORD_FUN_FACTS }}

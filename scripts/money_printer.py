@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Money Printer 모닝브리핑 — 무료 API만 사용, API 키 없음"""
+"""Money Printer 모닝브리핑 — 실시간 시장 데이터 + Gemini 분석"""
 import os, requests, feedparser
+import google.generativeai as genai
+import yfinance as yf
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
-today_str = datetime.now(KST).strftime("%Y-%m-%d")
+today_kst = datetime.now(KST).strftime("%Y년 %m월 %d일")
 
 def safe_get(url, params=None):
     try:
@@ -12,67 +14,124 @@ def safe_get(url, params=None):
     except:
         return {}
 
-# 크립토 (CoinGecko 무료)
+def fmt(v, prefix="$", decimals=0):
+    try:
+        f = float(v)
+        return f"{prefix}{f:,.{decimals}f}"
+    except:
+        return "N/A"
+
+def fmt_chg(v):
+    try:
+        f = float(v)
+        return f"({f:+.2f}%)"
+    except:
+        return ""
+
+# ── 크립토 (CoinGecko 무료) ──────────────────────────────────────
 crypto = safe_get(
     "https://api.coingecko.com/api/v3/simple/price",
-    params={"ids": "bitcoin,ethereum,solana", "vs_currencies": "usd,krw", "include_24hr_change": "true"},
+    params={"ids": "bitcoin,ethereum,solana", "vs_currencies": "usd",
+            "include_24hr_change": "true"},
 )
 btc = crypto.get("bitcoin", {})
 eth = crypto.get("ethereum", {})
 sol = crypto.get("solana", {})
 
-# Fear & Greed (alternative.me 무료)
+# ── Fear & Greed ─────────────────────────────────────────────────
 fng_data = safe_get("https://api.alternative.me/fng/?limit=1")
-fng = fng_data.get("data", [{}])[0]
-fng_val = fng.get("value", "N/A")
-fng_class = fng.get("value_classification", "N/A")
+fng      = fng_data.get("data", [{}])[0]
+fng_val  = fng.get("value", "N/A")
+fng_class= fng.get("value_classification", "N/A")
 
-# 금융 뉴스 (RSS)
-def get_fin_news(query, n=3):
-    url = f"https://news.google.com/rss/search?q={requests.utils.quote(query)}&hl=ko&gl=KR&ceid=KR:ko"
+# ── 주식 시장 (Yahoo Finance) ────────────────────────────────────
+def get_ticker(symbol):
+    try:
+        t = yf.Ticker(symbol)
+        hist = t.history(period="2d")
+        if len(hist) >= 2:
+            prev  = hist["Close"].iloc[-2]
+            close = hist["Close"].iloc[-1]
+            chg   = (close - prev) / prev * 100
+            return close, chg
+        elif len(hist) == 1:
+            return hist["Close"].iloc[-1], 0.0
+    except:
+        pass
+    return None, None
+
+sp500_p,  sp500_c  = get_ticker("^GSPC")
+nasdaq_p, nasdaq_c = get_ticker("^IXIC")
+kospi_p,  kospi_c  = get_ticker("^KS11")
+kosdaq_p, kosdaq_c = get_ticker("^KQ11")
+gold_p,   gold_c   = get_ticker("GC=F")
+
+# ── 금융 뉴스 RSS ────────────────────────────────────────────────
+def get_news(q, n=3):
+    url = f"https://news.google.com/rss/search?q={requests.utils.quote(q)}&hl=ko&gl=KR&ceid=KR:ko"
     try:
         feed = feedparser.parse(url)
         return [e.title[:80] for e in feed.entries[:n]]
     except:
         return []
 
-macro_news = get_fin_news("Fed 금리 거시경제 증시", 3)
-kr_news    = get_fin_news("KOSPI KOSDAQ 한국 증시", 3)
+macro_news = get_news("Fed 금리 미국 증시 경제", 3)
+kr_news    = get_news("KOSPI KOSDAQ 한국 증시", 3)
 
-def fmt_change(v):
-    try:
-        f = float(v)
-        return f"{f:+.2f}%"
-    except:
-        return "N/A"
+# ── 데이터 취합 ──────────────────────────────────────────────────
+market_data = f"""
+📈 글로벌 주식:
+- S&P500:  {fmt(sp500_p,  '', 1)} {fmt_chg(sp500_c)}
+- NASDAQ:  {fmt(nasdaq_p, '', 1)} {fmt_chg(nasdaq_c)}
+- Gold:    {fmt(gold_p)}  {fmt_chg(gold_c)}
 
-def fmt_price(v, comma=True):
-    try:
-        return f"${int(v):,}" if comma else str(v)
-    except:
-        return "N/A"
+🇰🇷 한국 주식:
+- KOSPI:  {fmt(kospi_p,  '', 2)} {fmt_chg(kospi_c)}
+- KOSDAQ: {fmt(kosdaq_p, '', 2)} {fmt_chg(kosdaq_c)}
 
-macro_str = "\n".join(f"• {h}" for h in macro_news) if macro_news else "• 뉴스 로딩 실패"
-kr_str    = "\n".join(f"• {h}" for h in kr_news)    if kr_news    else "• 뉴스 로딩 실패"
+🪙 크립토:
+- BTC: {fmt(btc.get('usd'))} {fmt_chg(btc.get('usd_24h_change'))}
+- ETH: {fmt(eth.get('usd'))} {fmt_chg(eth.get('usd_24h_change'))}
+- SOL: {fmt(sol.get('usd'))} {fmt_chg(sol.get('usd_24h_change'))}
+- Fear & Greed: {fng_val}/100 ({fng_class})
 
-msg = f"""💰 **Money Printer 모닝브리핑 | {today_str} 08:00 KST**
+📰 매크로 뉴스: {' | '.join(macro_news)}
+📰 한국 뉴스:   {' | '.join(kr_news)}
+"""
 
-🌍 **글로벌 매크로**
-{macro_str}
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+model = genai.GenerativeModel("gemini-2.0-flash")
 
-🇰🇷 **한국 증시 헤드라인**
-{kr_str}
+response = model.generate_content(f"""오늘은 {today_kst} 08:00 KST.
+당신은 세계적 수준의 퀀트 트레이더이자 시장 애널리스트입니다.
 
-🪙 **크립토 실시간**
-- BTC {fmt_price(btc.get('usd'))} ({fmt_change(btc.get('usd_24h_change'))}) | ₩{int(btc.get('krw',0)):,}
-- ETH {fmt_price(eth.get('usd'))} ({fmt_change(eth.get('usd_24h_change'))}) | ₩{int(eth.get('krw',0)):,}
-- SOL {fmt_price(sol.get('usd'))} ({fmt_change(sol.get('usd_24h_change'))})
-- 공포·탐욕 지수: **{fng_val}/100** ({fng_class})
+실시간 시장 데이터:
+{market_data}
 
-⚡ **오늘의 판단 기준**
-F&G {fng_val} → {'극단적 탐욕 — 신중하게. 고점 매도 고려' if int(fng_val or 0) >= 75 else '극단적 공포 — 분할 매수 기회 검토' if int(fng_val or 0) <= 25 else '중립 구간 — 추세 추종, 뚜렷한 시그널 없음'}
+아래 형식 그대로 Discord 메시지 작성 (다른 말 없이, 총 1900자 이내):
 
-📌 데이터 기준: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"""
+💰 **Money Printer 모닝브리핑 | {today_kst} KST**
 
-r = requests.post(os.environ["DISCORD_MONEY_PRINTER"], json={"content": msg[:2000]}, timeout=30)
+🌍 **글로벌 매크로 (2-3 bullets)**
+[위 뉴스와 주가 데이터를 해석한 간밤 핵심 이슈]
+
+🇰🇷 **한국 시장 오늘**
+• KOSPI: [위 데이터 반영] — [한 줄 해석]
+• KOSDAQ: [위 데이터 반영] — [한 줄 해석]
+• 주목 종목: [오늘 모멘텀/뉴스 기반 2개, 근거 포함]
+
+🪙 **크립토 스냅샷**
+• BTC: [위 데이터] | 지지 [레벨] / 저항 [레벨]
+• ETH: [위 데이터]
+• Fear & Greed: {fng_val}/100 ({fng_class})
+
+⚡ **매매 시그널**
+[고확신 셋업: "[매수/매도] [자산] @ [가격] → Target: [가격] | Stop: [가격] — [근거 1문장]"
+없으면: "오늘은 관망 (No clear signal today)"]
+
+📌 **오늘의 인사이트**
+[대부분의 개인 투자자가 놓칠 비자명적 인사이트 1개]""")
+
+text = response.text.strip()[:2000]
+r = requests.post(os.environ["DISCORD_MONEY_PRINTER"], json={"content": text}, timeout=30)
 print(f"money_printer → Discord: {r.status_code}")
