@@ -51,7 +51,9 @@ SYMPLE: CBT 기반 멘탈헬스 앱 Duck's Dream. CEO 김민수(연세대 심리
 [SYMPLE 현황과 연결한 구체적 전략 시사점 3개. 숫자·사실 포함.]
 
 **⚡ 이번 주 SYMPLE 액션**
-→ [구체적 행동 1가지]""")
+→ [구체적 행동 1가지]
+
+⚠️ 중요: 위 형식의 모든 텍스트는 반드시 한국어로만 작성하세요. 회사명·영문 고유명사 외 어떤 영어도 포함하지 마세요.""")
 
 r = requests.post(os.environ["DISCORD_COMPETITOR_INTEL"], json={"content": text[:2000]}, timeout=30)
 print(f"competitor_intel → {r.status_code}")

@@ -7,17 +7,22 @@ from datetime import datetime, timezone, timedelta
 KST = timezone(timedelta(hours=9))
 today = datetime.now(KST).strftime("%Y-%m-%d")
 
-FEEDS = [
-    "https://www.sciencedaily.com/rss/mind_brain/psychology.xml",
-    "https://news.google.com/rss/search?q=mental+health+psychology+research+therapy&hl=en&gl=US&ceid=US:en",
-    "https://womensmentalhealth.org/feed/",
-    "https://news.google.com/rss/search?q=site:psypost.org+mental+health&hl=en&gl=US&ceid=US:en",
+QUERIES = [
+    "depression anxiety treatment therapy 2024",
+    "burnout workplace stress mental health",
+    "CBT cognitive behavioral therapy research",
+    "mindfulness meditation mental health study",
+    "panic disorder PTSD therapy treatment",
+    "sleep disorder insomnia mental health",
+    "addiction recovery mental health",
+    "mental health app digital therapy",
 ]
 
 entries, seen = [], set()
-for src in FEEDS:
+for q in QUERIES:
     try:
-        for e in feedparser.parse(src).entries[:6]:
+        url = f"https://news.google.com/rss/search?q={requests.utils.quote(q)}&hl=en&gl=US&ceid=US:en"
+        for e in feedparser.parse(url).entries[:3]:
             t = e.get("title", "").strip()
             if t and t not in seen:
                 seen.add(t)
@@ -51,7 +56,9 @@ text = generate(client, f"""오늘은 {today}. 아래 뉴스에서 가장 중요
 
 2) ~ 5) 동일 형식
 
-— 출처: APA · NIMH · ScienceDaily · PsyPost · MGH Women's MH""")
+— 출처: APA · NIMH · ScienceDaily · PsyPost · MGH Women's MH
+
+⚠️ 중요: 영문 원제목(1번 줄)을 제외한 모든 텍스트는 반드시 한국어로만 작성하세요. 번역·요약·출처 설명 등 어떤 부분도 영어로 쓰지 마세요.""")
 
 r = requests.post(os.environ["DISCORD_MENTAL_CARE"], json={"content": text[:2000]}, timeout=30)
 print(f"mental_care → {r.status_code}")

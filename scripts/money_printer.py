@@ -103,7 +103,9 @@ text = generate(client, f"""오늘은 {today_kst} 08:00 KST. 당신은 세계적
 [고확신: "[매수/매도] [자산] @ [가격] → Target [가격] | Stop [가격] — [근거]" / 없으면: "오늘은 관망"]
 
 📌 **오늘의 인사이트**
-[대부분 개인 투자자가 놓칠 비자명적 인사이트 1개]""")
+[대부분 개인 투자자가 놓칠 비자명적 인사이트 1개]
+
+⚠️ 중요: 위 형식의 모든 텍스트는 반드시 한국어로만 작성하세요. 종목명·지수명·영문 고유명사 외 어떤 영어도 포함하지 마세요.""")
 
 r = requests.post(os.environ["DISCORD_MONEY_PRINTER"], json={"content": text[:2000]}, timeout=30)
 print(f"money_printer → {r.status_code}")

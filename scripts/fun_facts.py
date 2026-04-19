@@ -85,7 +85,9 @@ SYMPLE은 두 가지 제품을 가진 멘탈헬스 스타트업이다:
 [도깨비불(KKEBI)과 오리(오리의꿈)를 하나로 묶는 SYMPLE의 강력한 한 문장 포지셔닝.]
 
 SYMPLE Daily Insight · {today_str}
----""", max_tokens=1200)
+---
+
+⚠️ 중요: 위 형식의 모든 텍스트는 반드시 한국어로만 작성하세요. 영어는 화학식·수치·고유명사 외 절대 포함하지 마세요.""", max_tokens=1200)
 
 r = requests.post(os.environ["DISCORD_FUN_FACTS"], json={"content": text[:2000]}, timeout=30)
 print(f"fun_facts → {r.status_code}")
